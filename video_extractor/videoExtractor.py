@@ -3,6 +3,9 @@
 import cv2
 from optparse import OptionParser
 
+
+
+
 def __main__:
     
     parser = OptionParser()
@@ -26,17 +29,20 @@ def __main__:
                         type = "int",
                         action = "store"
                         )
-    parser.add_option("-S", "--split-filesize",
-                        dest = "split_filesize",
-                        help = "Split or chunk size in bytes (approximate)",
+    parser.add_option("-e", "--end-index",
+                        dest = "end_index",
+                        help = "Add end index",
                         type = "int",
                         action = "store"
                         )
-    parser.add_option("--filesize-factor",
-                        dest = "filesize_factor",
-                        help = "with --split-filesize, use this factor in time to" \
-                               " size heuristics [default: %default]",
-                        type = "float",
-                        action = "store",
-                        default = 0.95
-                        )
+    options, args = parser.parse_args()
+    
+    def bailout():
+        parser.print_help()
+        raise SystemExit
+
+    if not options.data_folder or options.output_folder or options.start_index or options.end_index:
+        bailout()
+    
+    
+    

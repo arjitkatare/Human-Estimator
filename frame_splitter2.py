@@ -70,9 +70,9 @@ def frameWiseTracker_dictmaker(a):
 
 
 def main(DATASET_PATH, keypoint_iterator, frame_wise_tracker):
-    videopath = os.path.join('/home/user/Workspace/',DATASET_PATH,'concated.mp4')
+    videopath = os.path.join(ROOT_PATH,DATASET_PATH,FILENAME)
     basename, ext = os.path.splitext(os.path.basename(videopath))
-    out_path =  os.path.join( '/home/user/Workspace/' ,DATASET_PATH , "frames_" + basename)
+    out_path =  os.path.join( ROOT_PATH ,DATASET_PATH , "frames_" + basename)
     os.makedirs(out_path, exist_ok=True)
     vidcap = cv2.VideoCapture(videopath)
     
@@ -103,9 +103,19 @@ def main(DATASET_PATH, keypoint_iterator, frame_wise_tracker):
 
 if __name__ == "__main__":
     
+    try:
+        ROOT_PATH = sys.argv[2]
+    except:
+        ROOT_PATH = '/home/user/Workspace/'
+    
+    try:
+        FILENAME = sys.argv[3]
+    except:
+        FILENAME = 'concated.mp4'
+    
     DATASET_PATH = sys.argv[1]
-    keypoint_path =  os.path.join( '/home/user/Workspace/', DATASET_PATH, 'concated-keypoints.ndjson')
-    tracker_path =  os.path.join( '/home/user/Workspace/', DATASET_PATH, 'concated.ndjson')
+    keypoint_path =  os.path.join( ROOT_PATH, DATASET_PATH, 'concated-keypoints.ndjson')
+    tracker_path =  os.path.join(ROOT_PATH, DATASET_PATH, 'concated.ndjson')
     a = ndjson.load(open(tracker_path,'r'))
     
     print(keypoint_path)
