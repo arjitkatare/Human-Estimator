@@ -1,0 +1,4 @@
+.ipyn*
+*.ipynb
+.env
+
