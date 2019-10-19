@@ -77,7 +77,7 @@ def main(DATASET_PATH, keypoint_iterator, frame_wise_tracker):
     vidcap = cv2.VideoCapture(videopath)
     
     #Initialisation before loop
-    keypoints_frame_data = next(keypoint_iterator)
+    keypoints_frame_data = next(keypoint_iterator) # Using a generator shall be prefered whenever possible
     success, image = vidcap.read()
     people = keypoints_frame_data['people']
     
