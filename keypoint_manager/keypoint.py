@@ -1,3 +1,4 @@
+# encoding = UTF-8
 """Extract frames from video using opencv and plotting keypoints from given data into given video frame and storing it as an image for reference and analysis
 """
 

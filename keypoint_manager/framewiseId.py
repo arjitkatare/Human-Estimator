@@ -8,7 +8,7 @@ import ndjson
 
 
 
-def framewiseId_printer(image, frame_wise_tracker, count):
+def FramewiseIdPrinter(image, frame_wise_tracker, count):
     total_positions = []
     font = cv2.FONT_HERSHEY_SIMPLEX
     color = (255, 0, 0) 
@@ -25,7 +25,7 @@ def framewiseId_printer(image, frame_wise_tracker, count):
     return image
 
 
-def frameWiseTracker_dictmaker(a):
+def FramewiseTrackerDictmaker(a):
     frame_wise_tracker = {} 
 
     def fwt_dictmaker(peop_id, frame_pose):

@@ -5,8 +5,8 @@ import sys
 import cv2
 from optparse import OptionParser
 
-def VideoExtractor(data_folder, filename, start_index, end_index):
-    filepath = os.path.join(data_folder, filename)
+def VideoExtractor(input_folder, filename, start_index, end_index):
+    filepath = os.path.join(input_folder, filename)
     
     #Initialisation
     cap = cv2.VideoCapture(filepath)
@@ -16,6 +16,7 @@ def VideoExtractor(data_folder, filename, start_index, end_index):
     while frame_number != end_index+1: 
 
         yield cap.read()
+        frame_number+=1
     
     yield (False, None)
 
