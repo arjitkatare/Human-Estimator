@@ -5,9 +5,8 @@ import sys
 import cv2
 import numpy as np
 
-
 KEYPOINT_DICT = {
-    '0': 'head',
+    '0': 'nose',
     '1': 'centre',
     '2': 'right shoulder',
     '3': 'right arm',
@@ -39,7 +38,9 @@ KEYPOINT_DICT = {
 class FeatureExtractor(object):
     def __init__(self, people):
         self.people = people
+#         np.save(open('./temp/people.pk', 'wb'), people)
         self.people_featured = None
+
         
     def make_features(self, feature):
         n = 3
@@ -48,5 +49,34 @@ class FeatureExtractor(object):
             for poses in self.people:
                 keypoints = poses['pose_keypoints']
                 keypoints = np.array([keypoints[i * n:((i + 1) * n)-1] for i in range((len(keypoints) + n - 1) // n )], dtype = int)
-                print(keypoints)
+                keypoints = keypoints[:18]
                 
+                # Checking deactivated components and preparing them for masking
+                zero_masker = np.sum(keypoints, axis = 1)
+                zero_masker = zero_masker != 0
+                print(zero_masker)
+                
+                feature1 = self.feature1_extractor(keypoints, zero_masker)
+                feature1 = np.reshape(feature1, (-1))
+                
+                print(feature1.shape)
+                
+                return feature1, zero_masker
+                
+                
+    def feature1_extractor(self, keypoints, zero_masker):
+        net_feature = []
+        for i, keypoint in enumerate(keypoints):
+            if zero_masker[i]:
+                net_feature.append(keypoints - keypoint)
+            else:
+                net_feature.append(keypoints*0)
+        return np.array(net_feature)
+                
+
+        
+# For testing purpose we dump the initialising file and load it here to test run the class
+if __name__ == '__main__':
+    people = np.load('./temp/people.pk', allow_pickle = True)
+    a = FeatureExtractor(people)
+    print(a.make_features('v1'))

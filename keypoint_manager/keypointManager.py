@@ -123,6 +123,7 @@ class KeypointManagerTest(object):
             if count == self.end_index:
                 success = False
             
-            features.make_features('v1')
-            break
+            feature1, zero_masker =  features.make_features('v1')
+            print(feature1, zero_masker, end = '\r')
+            input()
         video_writer.release()

@@ -2,3 +2,9 @@
 *.ipynb
 .env
 
+human_estimator/__pycache__/
+keypoint_manager/__pycache__/
+temp/
+video-splitter/
+video_extractor/__pycache__/
+videos/
