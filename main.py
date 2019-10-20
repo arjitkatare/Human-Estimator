@@ -7,10 +7,9 @@ import ndjson
 from optparse import OptionParser
 
 
-# Custom imports
-from video_extractor.videoExtractor import VideoExtractor
-from keypoint_manager.keypoint import KeypointPrinter
-from keypoint_manager.framewiseId import FramewiseIdPrinter, FramewiseTrackerDictmaker 
+# Custom imports from __init__.py file of the packages
+import video_extractor
+import keypoint_manager
 
 
 
@@ -83,24 +82,26 @@ def main():
 #     fourcc = int(cap_temp.get(cv2.CAP_PROP_FOURCC))
     fourcc = cv2.VideoWriter_fourcc(*"mp4v") # For mp4 support while using VideoWriter from opencv
     fps = int(cap_temp.get(cv2.CAP_PROP_FPS))
-    size = ( int(cap_temp.get(cv2.CAP_PROP_FRAME_WIDTH)), int(cap_temp.get(cv2.CAP_PROP_FRAME_HEIGHT)) )
-    print(fourcc, fps, size)
+    frame_size = ( int(cap_temp.get(cv2.CAP_PROP_FRAME_WIDTH)), int(cap_temp.get(cv2.CAP_PROP_FRAME_HEIGHT)) )
+    print(fourcc, fps, frame_size)
     del(cap_temp)
+    video_config = (fourcc, fps, frame_size)
     
     # Reading video from the start point mentioned
-    video_reader = VideoExtractor(input_folder, filename, start_index, end_index)
+    video_reader = video_extractor.VideoExtractor(input_folder, filename, start_index, end_index)
     
-    output_filename = os.path.join(output_folder, filename.split('.')[0] + str(start_index) + '_' +  str(end_index) + '.mp4' )
-    print(output_filename)
-   
-    video_writer = cv2.VideoWriter(output_filename, fourcc, fps, size)
+    output_filepath = os.path.join(output_folder, filename.split('.')[0] + str(start_index) + '_' +  str(end_index) + '.mp4' )
+    output_filename = os.path.join(output_folder, filename.split('.')[0] + str(start_index) + '_' +  str(end_index) + '_unprocessed.mp4' )
+    print(output_filepath)
     
-    success, frame = next(video_reader)
-    while success:
-        video_writer.write(frame)
-        success, frame = next(video_reader)
+#     video_writer = cv2.VideoWriter(output_filename, fourcc, fps, frame_size)
     
-    video_writer.release()
+#     success, frame = next(video_reader)
+#     while success:
+#         video_writer.write(frame)
+#         success, frame = next(video_reader)
+    
+#     video_writer.release()
     
     ###############################################################
     #Initialising some paths for next steps
@@ -115,7 +116,10 @@ def main():
     
     tracking_data = ndjson.load(open(tracker_path,'r'))
     keypoint_iterator = iter(ndjson.load(open(keypoint_path,'r')))
-    frame_wise_tracker = FramewiseTrackerDictmaker(tracking_data)
+    frame_wise_tracker = keypoint_manager.FramewiseTrackerDictmaker(tracking_data)
+    
+    manager = keypoint_manager.KeypointManager(input_folder, keypoint_iterator, frame_wise_tracker, output_filepath, video_reader, video_config, start_index, end_index)
+    manager.run()
     
     
 if __name__ == '__main__':
