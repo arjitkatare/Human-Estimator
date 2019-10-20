@@ -60,6 +60,6 @@ class KeypointManager(object):
             if count % 1000 == 0 :
                 print('Read a new frame {}: {}'.format(count, success), end="\r")
             count += 1
-            if end_index == self.end_index:
+            if count == self.end_index:
                 success = False
         video_writer.release()
