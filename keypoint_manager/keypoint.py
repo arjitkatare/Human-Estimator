@@ -1,14 +1,9 @@
 # encoding = UTF-8
-"""Extract frames from video using opencv and plotting keypoints from given data into given video frame and storing it as an image for reference and analysis
-"""
-
 
 import os
 import sys
 import cv2
 import ndjson
-
-
 
 def KeypointPrinter(image, people):
     
@@ -19,6 +14,8 @@ def KeypointPrinter(image, people):
         keypoints = poses['pose_keypoints']
         keypoints = [keypoints[i * n:(i + 1) * n] for i in range((len(keypoints) + n - 1) // n )] #Splitting array into array of subarrays of size n which is 3 for this case
         for i, point in enumerate(keypoints):
+            if i != 0:
+                continue
             temp = cv2.KeyPoint(point[0], point[1], _size = 10)
             total_keypoints.append(temp)
     cv2.drawKeypoints(image,total_keypoints, image)

@@ -3,6 +3,7 @@
 import os
 import sys
 import cv2
+import numpy as np
 
 
 KEYPOINT_DICT = {
@@ -38,5 +39,14 @@ KEYPOINT_DICT = {
 class FeatureExtractor(object):
     def __init__(self, people):
         self.people = people
+        self.people_featured = None
         
-    def
+    def make_features(self, feature):
+        n = 3
+        total_features_list = []
+        if feature == 'v1':
+            for poses in self.people:
+                keypoints = poses['pose_keypoints']
+                keypoints = np.array([keypoints[i * n:((i + 1) * n)-1] for i in range((len(keypoints) + n - 1) // n )], dtype = int)
+                print(keypoints)
+                
