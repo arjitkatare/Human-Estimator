@@ -105,10 +105,16 @@ class KeypointManagerTest(object):
 
         count = self.start_index
         success = True
+        
         while success:
+            features = None
             if success:
                 if len(people) != 0:
+                    print('number of people = ' + str(len(people)))
+                    print('Making Features')
                     features = human_estimator.FeatureExtractor(people)
+                    featured_people = features.make_features('v1')
+                    print(new_people)
                     image = KeypointPrinter(image, people)
                     image = FramewiseIdPrinter(image, self.frame_wise_tracker, count)
 
@@ -123,7 +129,5 @@ class KeypointManagerTest(object):
             if count == self.end_index:
                 success = False
             
-            feature1, zero_masker =  features.make_features('v1')
-            print(feature1, zero_masker, end = '\r')
             input()
         video_writer.release()

@@ -46,7 +46,7 @@ class FeatureExtractor(object):
         n = 3
         total_features_list = []
         if feature == 'v1':
-            for poses in self.people:
+            for i, poses in enumerate(self.people):
                 keypoints = poses['pose_keypoints']
                 keypoints = np.array([keypoints[i * n:((i + 1) * n)-1] for i in range((len(keypoints) + n - 1) // n )], dtype = int)
                 keypoints = keypoints[:18]
@@ -61,7 +61,14 @@ class FeatureExtractor(object):
                 
                 print(feature1.shape)
                 
-                return feature1, zero_masker
+                if 'feature1' in poses:
+                    poses['feature1'].append(feature1)
+                    poses['zero_masker'].append(zero_masker)
+                else:
+                    poses['feature1'] = [feature1]
+                    poses['zero_masker'] = [zero_masker]
+                
+            return self.people
                 
                 
     def feature1_extractor(self, keypoints, zero_masker):
