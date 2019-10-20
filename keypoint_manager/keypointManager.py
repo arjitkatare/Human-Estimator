@@ -27,7 +27,6 @@ class KeypointManager(object):
         
         self.basename, ext = os.path.splitext(os.path.basename(videopath))
         
-#         self.vidcap = cv2.VideoCapture(videopath)
         
     def run(self):
         #Initialisation before loop

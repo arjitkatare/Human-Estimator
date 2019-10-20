@@ -94,14 +94,6 @@ def main():
     output_filename = os.path.join(output_folder, filename.split('.')[0] + str(start_index) + '_' +  str(end_index) + '_unprocessed.mp4' )
     print(output_filepath)
     
-#     video_writer = cv2.VideoWriter(output_filename, fourcc, fps, frame_size)
-    
-#     success, frame = next(video_reader)
-#     while success:
-#         video_writer.write(frame)
-#         success, frame = next(video_reader)
-    
-#     video_writer.release()
     
     ###############################################################
     #Initialising some paths for next steps
@@ -113,12 +105,16 @@ def main():
     
     keypoint_path =  os.path.join(DATASET_PATH, 'concated-keypoints.ndjson')
     tracker_path =  os.path.join(DATASET_PATH, 'concated.ndjson')
-    
+    print('Starting dataset loading process')
     tracking_data = ndjson.load(open(tracker_path,'r'))
+    print('tracking data loaded')
     keypoint_iterator = iter(ndjson.load(open(keypoint_path,'r')))
+    print('keypoint iterator loaded')
     frame_wise_tracker = keypoint_manager.FramewiseTrackerDictmaker(tracking_data)
+    print('framewisetracker loaded')
     
     manager = keypoint_manager.KeypointManager(input_folder, keypoint_iterator, frame_wise_tracker, output_filepath, video_reader, video_config, start_index, end_index)
+    print('started running manager')
     manager.run()
     
     
