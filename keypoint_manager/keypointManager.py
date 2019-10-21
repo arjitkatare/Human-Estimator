@@ -136,13 +136,13 @@ class KeypointManagerTest(object):
                     estimator.add_people_positions_featured(people_positions_featured)
                     estimator.add_featured_people(featured_people)
                     
-                    estimator.run_people_positions()
+                    estimator.run_people_positions(count)
                     
                     print(estimator.running_data_getter().keys())
-                    print(estimator.running_data_getter()['7275']['average_feature2'])
-                    print(estimator.running_data_getter()['7275']['average_feature2'].shape)
-                    print(estimator.running_data_getter()['7275']['count'])
-                    print(estimator.running_data_getter()['7275']['feature2_change'])
+                    print(estimator.running_data_getter()['7275']['position'])
+                    print(estimator.running_data_getter()['7275']['feature2'])
+                    print(estimator.running_data_getter()['7275']['running_count'])
+                    print(estimator.running_data_getter()['7275']['time_step'])
                     print(len(estimator.running_data_getter()))
                     
                 # Writing Image
