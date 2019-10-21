@@ -113,7 +113,7 @@ def main():
     frame_wise_tracker = keypoint_manager.FramewiseTrackerDictmaker(tracking_data)
     print('framewisetracker loaded')
     
-    manager = keypoint_manager.KeypointManagerTest(input_folder, keypoint_iterator, frame_wise_tracker, output_filepath, video_reader, video_config, start_index, end_index)
+    manager = keypoint_manager.KeypointManager(input_folder, keypoint_iterator, frame_wise_tracker, output_filepath, video_reader, video_config, start_index, end_index)
     print('started running manager')
     manager.run()
     

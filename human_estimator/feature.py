@@ -48,8 +48,9 @@ class FeatureExtractor(object):
         if feature == 'v1':
             for i, poses in enumerate(self.people):
                 keypoints = poses['pose_keypoints']
-                keypoints = np.array([keypoints[i * n:((i + 1) * n)-1] for i in range((len(keypoints) + n - 1) // n )], dtype = int)
-                keypoints = keypoints[:18]
+                keypoints = np.array([keypoints[i * n:((i + 1) * n)-1] for i in range((len(keypoints) + n - 1) // n )],
+                                     dtype = int)
+                keypoints = keypoints[:18] # Using only first 18 points as rest of them are repetetive somehow!!
                 
                 # Checking deactivated components and preparing them for masking
                 zero_masker = np.sum(keypoints, axis = 1)

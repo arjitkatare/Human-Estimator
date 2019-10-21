@@ -106,6 +106,8 @@ class KeypointManagerTest(object):
         count = self.start_index
         success = True
         
+        estimator = human_estimator.HumanEstimator()
+        
         while success:
             features = None
             if success:
