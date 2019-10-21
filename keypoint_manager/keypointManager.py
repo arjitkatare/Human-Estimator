@@ -5,6 +5,7 @@ import sys
 import cv2
 import ndjson
 import numpy as np
+import pickle
 
 from .keypoint import KeypointPrinter
 from .framewiseId import FramewiseIdPrinter, FramewiseTrackerDictmaker
@@ -85,6 +86,8 @@ class KeypointManagerTest(object):
         
         self.basename, ext = os.path.splitext(os.path.basename(videopath))
         
+#         pickle.save(open('./temp/keymanager.pk', 'wb'), )
+        
         
     def run(self):
         #Initialisation before loop
@@ -110,16 +113,39 @@ class KeypointManagerTest(object):
         
         while success:
             features = None
+            featured_people = None
+            people_positions = None
             if success:
-                if len(people) != 0:
+                if len(people) != 0 and str(count) in self.frame_wise_tracker:
+                    
                     print('number of people = ' + str(len(people)))
                     print('Making Features')
                     features = human_estimator.FeatureExtractor(people)
                     featured_people = features.make_features('v1')
-                    print(featured_people)
+#                     print(featured_people)
+                    
                     image = KeypointPrinter(image, people)
                     image = FramewiseIdPrinter(image, self.frame_wise_tracker, count)
-
+                    
+                    people_positions = estimator.framewise_id_getter(self.frame_wise_tracker, count) # Using static method from estimator
+                    people_positions_features = human_estimator.FeatureExtractorForFramewise(people_positions)
+                    people_positions_featured = people_positions_features.make_features('v1')
+#                     print('Prining people position featured')
+#                     print(people_positions_featured)
+                    
+                    estimator.add_people_positions_featured(people_positions_featured)
+                    estimator.add_featured_people(featured_people)
+                    
+                    estimator.run_people_positions()
+                    
+                    print(estimator.running_data_getter().keys())
+                    print(estimator.running_data_getter()['7275']['average_feature2'])
+                    print(estimator.running_data_getter()['7275']['average_feature2'].shape)
+                    print(estimator.running_data_getter()['7275']['count'])
+                    print(estimator.running_data_getter()['7275']['feature2_change'])
+                    print(len(estimator.running_data_getter()))
+                    
+                # Writing Image
                 video_writer.write(image)
             success, image = next(self.vidcap)
             keypoints_frame_data = next(self.keypoint_iterator)
@@ -130,6 +156,14 @@ class KeypointManagerTest(object):
             count += 1
             if count == self.end_index:
                 success = False
-            
+            print('###################')
+            print(count)
             input()
         video_writer.release()
+        
+if __name__ == '__main__':
+    
+    input_folder, keypoint_iterator, frame_wise_tracker, output_filepath, video_reader, video_config, start_index, end_index = pickle.load(open('./temp/keymanager.pk', 'rb'))
+    manager = keypoint_manager.KeypointManagerTest(input_folder, keypoint_iterator, frame_wise_tracker, output_filepath, video_reader, video_config, start_index, end_index)
+    print('started running manager')
+    manager.run()

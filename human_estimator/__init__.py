@@ -1,2 +1,2 @@
-from .feature import FeatureExtractor
+from .feature import FeatureExtractor, FeatureExtractorForFramewise
 from .humanEstimator import HumanEstimator
