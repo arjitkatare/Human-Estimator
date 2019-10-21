@@ -55,22 +55,39 @@ class FeatureExtractor(object):
                 zero_masker = np.sum(keypoints, axis = 1)
                 zero_masker = zero_masker != 0
                 print(zero_masker)
+                self.dict_array_keypoints_adder(keypoints, poses, zero_masker)
                 
+                # Adding feature1
+                # This is distance of each keypoint with all other keypoints. We are using 
                 feature1 = self.feature1_extractor(keypoints, zero_masker)
-                feature1 = np.reshape(feature1, (-1))
-                
+                feature1 = np.reshape(feature1, (-1,2)) 
                 print(feature1.shape)
+                self.dict_array_feature_adder('feature1', feature1, poses)
                 
-                if 'feature1' in poses:
-                    poses['feature1'].append(feature1)
-                    poses['zero_masker'].append(zero_masker)
-                else:
-                    poses['feature1'] = [feature1]
-                    poses['zero_masker'] = [zero_masker]
+                # Adding feature2
+                # This feature is just mean of all keypoints to retain a average location of the object
+                feature2 = self.feature2_extractor(keypoints)
+                print(feature2)
+                self.dict_array_feature_adder('feature2', feature2, poses)
+                
                 
             return self.people
                 
-                
+    def dict_array_feature_adder(self, feature_name, feature, poses):
+        if feature_name in poses: # This will add feature1 into the dict of self.people in loop
+            poses[feature].append(feature)
+        else:
+            poses[feature_name] = [feature]
+            
+    def dict_array_keypoints_adder(self, keypoints, poses, zero_masker):
+        if 'zero_masker' in poses:
+            poses['zero_masker'].append(zero_masker)
+            poses['keypoints'].append(keypoints)
+        else:
+            poses['zero_masker'] = [zero_masker]
+            poses['keypoints'] = [keypoints]
+            
+    
     def feature1_extractor(self, keypoints, zero_masker):
         net_feature = []
         for i, keypoint in enumerate(keypoints):
@@ -79,8 +96,12 @@ class FeatureExtractor(object):
             else:
                 net_feature.append(keypoints*0)
         return np.array(net_feature)
-                
-
+    
+    def feature2_extractor(self, keypoints):
+        feature2 = np.mean(keypoints, axis = 0)
+        return np.reshape(feature2, (2,))
+        
+        
         
 # For testing purpose we dump the initialising file and load it here to test run the class
 if __name__ == '__main__':

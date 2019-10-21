@@ -114,7 +114,7 @@ class KeypointManagerTest(object):
                     print('Making Features')
                     features = human_estimator.FeatureExtractor(people)
                     featured_people = features.make_features('v1')
-                    print(new_people)
+                    print(featured_people)
                     image = KeypointPrinter(image, people)
                     image = FramewiseIdPrinter(image, self.frame_wise_tracker, count)
 
