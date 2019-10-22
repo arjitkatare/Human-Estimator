@@ -127,7 +127,9 @@ class KeypointManagerTest(object):
                     image = KeypointPrinter(image, people)
                     image = FramewiseIdPrinter(image, self.frame_wise_tracker, count)
                     
-                    people_positions = estimator.framewise_id_getter(self.frame_wise_tracker, count) # Using static method from estimator
+                    # Using static method from estimator
+                    people_positions = estimator.framewise_id_getter(self.frame_wise_tracker, count) 
+                    
                     people_positions_features = human_estimator.FeatureExtractorForFramewise(people_positions)
                     people_positions_featured = people_positions_features.make_features('v1')
 #                     print('Prining people position featured')
@@ -135,15 +137,22 @@ class KeypointManagerTest(object):
                     
                     estimator.add_people_positions_featured(people_positions_featured)
                     estimator.add_featured_people(featured_people)
-                    
                     estimator.run_people_positions(count)
                     
+                    print('printin keys of running_data')
                     print(estimator.running_data_getter().keys())
-                    print(estimator.running_data_getter()['7275']['position'])
-                    print(estimator.running_data_getter()['7275']['feature2'])
+                    print('printing positions array')
+                    print(estimator.running_data_getter()['7275']['positions'])
+                    print('printing feature2s array')
+                    print(estimator.running_data_getter()['7275']['feature2s'])
+                    print('printing running count')
                     print(estimator.running_data_getter()['7275']['running_count'])
-                    print(estimator.running_data_getter()['7275']['time_step'])
+                    print('printing time steps')
+                    print(estimator.running_data_getter()['7275']['time_steps'])
                     print(len(estimator.running_data_getter()))
+                    
+                    #Starting Calculation
+                    estimator.run_calculations()
                     
                 # Writing Image
                 video_writer.write(image)

@@ -123,14 +123,14 @@ class FeatureExtractorForFramewise(object):
                 
                 # Checking deactivated components and preparing them for masking
                 zero_masker = np.sum(keypoints, axis = 1)
-                zero_masker = zero_masker != 0
+                zero_masker = zero_masker != 0 #This will ensure that we only do calculation for same number of keypoints
 #                 print(zero_masker)
                 self.dict_array_keypoints_adder(keypoints, poses, zero_masker)
                 
                 # Adding feature1
                 # This is distance of each keypoint with all other keypoints. We are using 
                 feature1 = self.feature1_extractor(keypoints, zero_masker)
-                feature1 = np.reshape(feature1, (-1,2)) 
+                feature1 = np.reshape(feature1, (-1)) 
 #                 print(feature1.shape)
                 self.dict_array_feature_adder('feature1', feature1, poses)
                 
