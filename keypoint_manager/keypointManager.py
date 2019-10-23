@@ -13,6 +13,19 @@ from .framewiseId import FramewiseIdPrinter, FramewiseTrackerDictmaker
 
 import human_estimator
 
+# This help us in stopping all those print statemetns while executing process
+check = 2
+def printed():
+    if check == 1:
+        return print
+    else:
+        def dummy(a = None, b = None, c = None, d = None, e = None, f = None, end = None):
+            pass
+        return dummy
+
+print = printed()
+
+
 
 class KeypointManager(object):
     def __init__(self, input_folder, keypoint_iterator, frame_wise_tracker, output_filepath, video_reader, video_config, start_index=None, end_index=None):
@@ -125,7 +138,7 @@ class KeypointManagerTest(object):
 #                     print(featured_people)
                     
                     image = KeypointPrinter(image, people)
-                    image = FramewiseIdPrinter(image, self.frame_wise_tracker, count)
+                    image = FramewiseIdPrinter(image, self.frame_wise_tracker, count, estimator)
                     
                     # Using static method from estimator
                     people_positions = estimator.framewise_id_getter(self.frame_wise_tracker, count) 
@@ -139,18 +152,6 @@ class KeypointManagerTest(object):
                     estimator.add_featured_people(featured_people)
                     estimator.run_people_positions(count)
                     
-#                     print('printin keys of running_data')
-#                     print(estimator.running_data_getter().keys())
-#                     print('printing positions array')
-#                     print(estimator.running_data_getter()['7275']['positions'])
-#                     print('printing feature2s array')
-#                     print(estimator.running_data_getter()['7275']['feature2s'])
-#                     print('printing running count')
-#                     print(estimator.running_data_getter()['7275']['running_count'])
-#                     print('printing time steps')
-#                     print(estimator.running_data_getter()['7275']['time_steps'])
-#                     print(len(estimator.running_data_getter()))
-                    
                     #Starting Calculation
                     estimator.run_calculations()
                     
@@ -160,17 +161,17 @@ class KeypointManagerTest(object):
             keypoints_frame_data = next(self.keypoint_iterator)
             people = keypoints_frame_data['people']
 
-            if count % 1000 == 0 :
+            if count % 100 == 0 :
                 print('Read a new frame {}: {}'.format(count, success), end="\r")
             count += 1
             if count == self.end_index:
                 success = False
-            print('###################')
-            print(count)
-            input()
-            print(estimator.human_certainity.keys())
-            print(estimator.people_getting_tracked.keys() - estimator.human_certainity.keys())
-            input()
+#             print('###################')
+#             print(count)
+#             input()
+#             print(estimator.human_certainity.keys())
+#             print(estimator.people_getting_tracked.keys() - estimator.human_certainity.keys())
+#             input()
         video_writer.release()
         
 if __name__ == '__main__':

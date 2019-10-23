@@ -8,7 +8,7 @@ import ndjson
 
 
 
-def FramewiseIdPrinter(image, frame_wise_tracker, count):
+def FramewiseIdPrinter(image, frame_wise_tracker, count, estimator):
     total_positions = []
     font = cv2.FONT_HERSHEY_SIMPLEX
     color = (255, 0, 0) 
@@ -20,8 +20,13 @@ def FramewiseIdPrinter(image, frame_wise_tracker, count):
         for people in people_positions:
             position = people['position']
             pId = people['id']
+            probability = 0
+            if str(pId) in estimator.running_probability:
+                probability =  estimator.running_probability[pId]
+                if str(pId) in estimator.human_certainity:
+                    probability = 1
             
-            image = cv2.putText(image, str(pId), (int(position[0]), int(position[1])), font, fontScale, color, thickness, cv2.LINE_AA   )
+            image = cv2.putText(image, str(pId) + " - " + str(probability) , (int(position[0]), int(position[1])), font, fontScale, color, thickness, cv2.LINE_AA   )
     return image
 
 

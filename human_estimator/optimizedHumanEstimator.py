@@ -20,7 +20,7 @@ def printed():
 print = printed()
 
 
-class HumanEstimator(object):
+class OptimizedHumanEstimator(object):
     
     @staticmethod
     def framewise_id_getter(frame_wise_tracker, index):
@@ -157,6 +157,10 @@ class HumanEstimator(object):
         
         
         for person_id in self.people_getting_tracked:
+            
+            if person_id in self.human_certainity:
+                continue
+            
             # Some Initialisation
             running_data_person = running_data[person_id]
             running_count = running_data_person['running_count']
@@ -171,7 +175,9 @@ class HumanEstimator(object):
                     analysis_started[person_id] = {
                         'index_done': -1
                     }
-                    
+                analysis_started[person_id]['index_done'] += 1
+                index_done = analysis_started[person_id]['index_done']
+                
                 analysis_dict = analysis_started[person_id]
                 
                 # Loading current step data     
@@ -182,10 +188,10 @@ class HumanEstimator(object):
                 if len(time_steps) <= current_index - 1:
                     continue
                 
-                positions = running_data_person['positions']
-                feature1s = running_data_person['feature1s']
-                feature2s = running_data_person['feature2s']
-                zero_maskers = running_data_person['zero_maskers']
+                positions = running_data_person['positions'][index_done:]
+                feature1s = running_data_person['feature1s'][index_done:]
+                feature2s = running_data_person['feature2s'][index_done:]
+                zero_maskers = running_data_person['zero_maskers'][index_done:]
 
                 # This help us in ensuring that current time steps are continuous for our average_change calculations
                 # for other parameters

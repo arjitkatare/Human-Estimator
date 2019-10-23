@@ -121,12 +121,28 @@ def main():
     print('Starting dataset loading process')
     tracking_data = ndjson.load(open(tracker_path,'r'))
     print('tracking data loaded')
-    keypoint_iterator = iter(ndjson.load(open(keypoint_path,'r')))
+    keypoint_data = ndjson.load(open(keypoint_path,'r'))
+    keypoint_iterator = iter(keypoint_data)
     print('keypoint iterator loaded')
     frame_wise_tracker = keypoint_manager.FramewiseTrackerDictmaker(tracking_data)
     print('framewisetracker loaded')
     
-    manager = keypoint_manager.KeypointManagerTest(input_folder, keypoint_iterator, frame_wise_tracker, output_filepath, video_reader, video_config, start_index, end_index)
+    separation = 10000
+    video_indexes = range(0, end_index, separation)
+    
+    for i in video_indexes:
+        start_index = i
+        end_index = i + separation*0.2
+        manager = keypoint_manager.KeypointManagerTest(input_folder, keypoint_iterator, frame_wise_tracker, output_filepath,
+                                                      video_reader, video_config, start_index, end_index)
+        manager.run()
+        del(manager)
+        del(keypoint_iterator)
+        keypoint_iterator = iter(keypoint_data)
+    
+    
+    
+#     manager = keypoint_manager.KeypointManagerTest(input_folder, keypoint_iterator, frame_wise_tracker, output_filepath, video_reader, video_config, start_index, end_index)
     print('started running manager')
     manager.run()
     
