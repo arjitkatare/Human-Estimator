@@ -11,6 +11,17 @@ from optparse import OptionParser
 import video_extractor
 import keypoint_manager
 
+# This help us in stopping all those print statemetns while executing process
+check = 1
+def printed():
+    if check == 1:
+        return print
+    else:
+        def dummy(a = None, b = None, c = None, d = None, e = None, f = None):
+            pass
+        return dummy
+
+print = printed()
 
 
 def main():

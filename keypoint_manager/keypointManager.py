@@ -139,17 +139,17 @@ class KeypointManagerTest(object):
                     estimator.add_featured_people(featured_people)
                     estimator.run_people_positions(count)
                     
-                    print('printin keys of running_data')
-                    print(estimator.running_data_getter().keys())
-                    print('printing positions array')
-                    print(estimator.running_data_getter()['7275']['positions'])
-                    print('printing feature2s array')
-                    print(estimator.running_data_getter()['7275']['feature2s'])
-                    print('printing running count')
-                    print(estimator.running_data_getter()['7275']['running_count'])
-                    print('printing time steps')
-                    print(estimator.running_data_getter()['7275']['time_steps'])
-                    print(len(estimator.running_data_getter()))
+#                     print('printin keys of running_data')
+#                     print(estimator.running_data_getter().keys())
+#                     print('printing positions array')
+#                     print(estimator.running_data_getter()['7275']['positions'])
+#                     print('printing feature2s array')
+#                     print(estimator.running_data_getter()['7275']['feature2s'])
+#                     print('printing running count')
+#                     print(estimator.running_data_getter()['7275']['running_count'])
+#                     print('printing time steps')
+#                     print(estimator.running_data_getter()['7275']['time_steps'])
+#                     print(len(estimator.running_data_getter()))
                     
                     #Starting Calculation
                     estimator.run_calculations()
@@ -167,6 +167,9 @@ class KeypointManagerTest(object):
                 success = False
             print('###################')
             print(count)
+            input()
+            print(estimator.human_certainity.keys())
+            print(estimator.people_getting_tracked.keys() - estimator.human_certainity.keys())
             input()
         video_writer.release()
         

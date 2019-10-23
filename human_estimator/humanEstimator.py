@@ -29,6 +29,7 @@ class HumanEstimator(object):
             
         }
         self.people_getting_tracked = self.global_data['people_getting_tracked']
+        self.human_certainity = self.global_data['human_certainity']
         self.step_data = None
     
     def add_people_positions_featured(self, people_positions_featured):
@@ -134,7 +135,7 @@ class HumanEstimator(object):
     
     
     # This will calculate our needed average_changes for estimation of human or mannequin
-    def run_calculations(self, minimum_steps = 15):
+    def run_calculations(self, minimum_steps = 8):
         
         running_data = self.running_data_getter()
         last_used_data = self.last_used_data_getter()
@@ -174,7 +175,7 @@ class HumanEstimator(object):
 
                 # This help us in ensuring that current time steps are continuous for our average_change calculations
                 # for other parameters
-                
+                difference_time_steps = self.make_time_steps_masker(time_steps, person_id)                
                 difference_positions = self.make_positions_changes(positions) # Primary decider
                 cosine_feature1s = self.make_feature1s_cosine(feature1s)  # Additionl decider, For absolute certaininty
                 difference_feature1s = self.make_feature1s_changes(feature1s) # Secondary decider
@@ -182,14 +183,59 @@ class HumanEstimator(object):
                 
                 # If zero_masker are not same then we need to mask those values in calculation as the values will vary
                 # if both of them are not similiar
-                zero_maskers_similiarity = self.make_zero_maskers_similiarity(zero_maskers)
-                difference_time_steps = self.make_time_steps_masker(time_steps, person_id)
+                zero_maskers_similiarity = self.make_zero_maskers_similiarity(zero_maskers) # Even this is a decider as continuos change in available keypoints show movements
                 
+                
+                final_mask = difference_time_steps * zero_maskers_similiarity
+                print(final_mask)
                 # changes calculation from here onwards
                 
-                
+                # Voting
+                self.election_commission(person_id, difference_feature2s, final_mask, 2, 5)
+                self.election_commission(person_id, difference_feature1s, final_mask, 1, 5)
+                self.election_commission(person_id, cosine_feature1s, final_mask, 100, 100)
+                self.election_commission(person_id, difference_positions, final_mask, 100, 100)
+                self.election_commission_zero_masker_similiarity(person_id, zero_maskers_similiarity, 0.7)
+#                 self.election_commission(person_id, difference_feature1s)
+                print(person_id)
             else:
                 continue
+    
+    def election_commission_zero_masker_similiarity(self, person_id, zero_maskers_similiarity, threshold):
+        print('zero_masker_similiarity', zero_maskers_similiarity)
+        zero_counter = np.array(zero_maskers_similiarity) == 0
+        print(zero_counter)
+        estimator = float(np.sum(zero_counter))/ len(zero_maskers_similiarity)
+        print('printing estimator - ', estimator)
+        
+        if estimator > threshold and len(zero_maskers_similiarity) > 10:
+            self.human_certainity[person_id] = 1
+    
+    def election_commission(self, person_id, difference, final_mask, threshold = 2, vote_threshold = 5):
+        
+        jumps = self.jump_detector(difference, final_mask, threshold)
+        print(jumps)
+        vote = np.sum(jumps)
+        if vote > vote_threshold:
+            self.human_certainity[person_id] = 1
+    
+    
+    
+    @staticmethod
+    def jump_detector(array, final_mask, threshold):
+        mask_array = array * final_mask != 0
+        usable_array = array[mask_array]
+        print('printing usable array')
+        print(usable_array)
+        
+        jumps = usable_array >= threshold
+        
+        return jumps
+        
+            
+            
+                
+    
     
     def make_feature1s_changes(self, feature1s):
         feature1_zero = np.zeros_like(feature1s[0])
@@ -197,10 +243,10 @@ class HumanEstimator(object):
         
         difference_feature1s = -right_shifted_feature1s + feature1s
         
-        difference_feature1s  =  np.sum( np.sum(difference_feature1s**2, axis = 1)**0.5, axis = 1)
+        difference_feature1s  =  np.sum( np.sum(difference_feature1s**2, axis = 1)**0.5, axis = 1)/648.0
         
         print('printing difference feature1s')
-        print(difference_feature1s.shape, np.sum(difference_feature1s == 0) )
+        print(difference_feature1s.shape, difference_feature1s)
         return difference_feature1s
     
     
@@ -216,6 +262,7 @@ class HumanEstimator(object):
             previous = i
          
         print('printing zero_maskesr_similiarity', zero_maskers_similiarity, zero_maskers)
+        return zero_maskers_similiarity
     
     
     def make_feature2s_changes(self, feature2s):
@@ -274,6 +321,7 @@ class HumanEstimator(object):
 
         difference_time_steps = -right_shifted_time_steps + time_steps
         difference_time_steps[0] = 0
+        difference_time_steps = difference_time_steps == 1
         print('printing difference time_steps -', person_id)
         print(difference_time_steps)
         return difference_time_steps
