@@ -1,3 +1,3 @@
 from .keypoint import KeypointPrinter
 from .framewiseId import FramewiseIdPrinter, FramewiseTrackerDictmaker
-from .keypointManager import KeypointManager, KeypointManagerTest
+from .keypointManager import KeypointManager, KeypointManagerTest, KeypointManagerOptimized

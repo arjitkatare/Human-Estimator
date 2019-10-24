@@ -4,6 +4,10 @@ import os
 import sys
 import cv2
 import numpy as np
+import multiprocessing
+from joblib import Parallel, delayed
+
+num_cores = multiprocessing.cpu_count()
 
 # Main Estimator class handling all calculations
 
@@ -44,6 +48,7 @@ class OptimizedHumanEstimator(object):
         self.running_probability = self.global_data['running_probability']
         self.people_getting_tracked = self.global_data['people_getting_tracked']
         self.human_certainity = self.global_data['human_certainity']
+        self.running_data = self.global_data['running_data']
         self.step_data = None
     
     def add_people_positions_featured(self, people_positions_featured):
@@ -78,6 +83,8 @@ class OptimizedHumanEstimator(object):
             
             
         self.run_process()
+        people_getting_tracked = self.people_getting_tracked_getter()
+        Parallel(n_jobs=num_cores)(delayed(self.run_calculations)(i) for i in people_getting_tracked)
         
         
     def global_data_personId_maker(self, zero_masker, feature1, feature2, position, count):
@@ -95,6 +102,9 @@ class OptimizedHumanEstimator(object):
         
         
         for person_id in self.step_data:
+            if person_id in self.human_certainity:
+                self.running_data
+                continue
             #Loading current step data for given person ID
             current_data = self.step_data[person_id]
             current_zero_masker = current_data['zero_masker']
@@ -137,7 +147,10 @@ class OptimizedHumanEstimator(object):
             running_count += 1
             running_data[person_id]['running_count'] = running_count
             
-            
+    
+    def people_getting_tracked_getter(self):
+        return self.global_data['people_getting_tracked'].keys()
+    
     def running_data_getter(self):
         return self.global_data['running_data']
     
@@ -149,77 +162,64 @@ class OptimizedHumanEstimator(object):
     
     
     # This will calculate our needed average_changes for estimation of human or mannequin
-    def run_calculations(self, minimum_steps = 5):
+    def run_calculations(self, person_id, minimum_steps = 5):
         
         running_data = self.running_data_getter()
         last_used_data = self.last_used_data_getter()
         analysis_started = self.analysis_started_getter()
-        
-        
-        for person_id in self.people_getting_tracked:
-            
-            if person_id in self.human_certainity:
-                continue
-            
-            # Some Initialisation
-            running_data_person = running_data[person_id]
-            running_count = running_data_person['running_count']
-            
 
-            # Just to make sure we are not making random guesses let the data be collected upto a threshold
-            if running_count > minimum_steps:
-                
-                # If person not yet added to the analysis routine then add it 
-                if person_id not in analysis_started:
-                    #Adding to analysis started tracker
-                    analysis_started[person_id] = {
-                        'index_done': -1
-                    }
-                analysis_started[person_id]['index_done'] += 1
-                index_done = analysis_started[person_id]['index_done']
-                
-                analysis_dict = analysis_started[person_id]
-                
-                # Loading current step data     
-                current_index = analysis_dict['index_done'] + 1
-                time_steps = running_data_person['time_steps']
-                
-                # Checking whether time_steps array is long enough
-                if len(time_steps) <= current_index - 1:
-                    continue
-                
-                positions = running_data_person['positions'][index_done:]
-                feature1s = running_data_person['feature1s'][index_done:]
-                feature2s = running_data_person['feature2s'][index_done:]
-                zero_maskers = running_data_person['zero_maskers'][index_done:]
+            # This will free some memory
+        if person_id in self.human_certainity:
+            self.running_data[person_id] = None
+            return
 
-                # This help us in ensuring that current time steps are continuous for our average_change calculations
-                # for other parameters
-                difference_time_steps = self.make_time_steps_masker(time_steps, person_id)                
-                difference_positions = self.make_positions_changes(positions) # Primary decider
-                cosine_feature1s = self.make_feature1s_cosine(feature1s)  # Additionl decider, For absolute certaininty
-                difference_feature1s = self.make_feature1s_changes(feature1s) # Secondary decider
-                difference_feature2s = self.make_feature2s_changes(feature2s) #  Additional Secondary decider
-                
-                # If zero_masker are not same then we need to mask those values in calculation as the values will vary
-                # if both of them are not similiar
-                zero_maskers_similiarity = self.make_zero_maskers_similiarity(zero_maskers) # Even this is a decider as continuos change in available keypoints show movements
-                
-                
-                final_mask = difference_time_steps * zero_maskers_similiarity
-                print(final_mask)
-                # changes calculation from here onwards
-                
-                # Voting
-                self.election_commission(person_id, difference_feature2s, final_mask, 2, 5)
-                self.election_commission(person_id, difference_feature1s, final_mask, 1, 5)
-                self.election_commission(person_id, cosine_feature1s, final_mask, 100, 100)
-                self.election_commission(person_id, difference_positions, final_mask, 100, 100)
-                self.election_commission_zero_masker_similiarity(person_id, zero_maskers_similiarity, 0.7)
+
+
+        # Some Initialisation
+        running_data_person = running_data[person_id]
+        running_count = running_data_person['running_count']
+
+
+        # Just to make sure we are not making random guesses let the data be collected upto a threshold
+        if running_count > minimum_steps:
+
+
+            # Loading current step data     
+            time_steps = running_data_person['time_steps']
+
+
+
+            positions = running_data_person['positions']
+            feature1s = running_data_person['feature1s']
+            feature2s = running_data_person['feature2s']
+            zero_maskers = running_data_person['zero_maskers']
+
+            # This help us in ensuring that current time steps are continuous for our average_change calculations
+            # for other parameters
+            difference_time_steps = self.make_time_steps_masker(time_steps, person_id)                
+            difference_positions = self.make_positions_changes(positions) # Primary decider
+            cosine_feature1s = self.make_feature1s_cosine(feature1s)  # Additionl decider, For absolute certaininty
+            difference_feature1s = self.make_feature1s_changes(feature1s) # Secondary decider
+            difference_feature2s = self.make_feature2s_changes(feature2s) #  Additional Secondary decider
+
+            # If zero_masker are not same then we need to mask those values in calculation as the values will vary
+            # if both of them are not similiar
+            zero_maskers_similiarity = self.make_zero_maskers_similiarity(zero_maskers) # Even this is a decider as continuos change in available keypoints show movements
+
+
+            final_mask = difference_time_steps * zero_maskers_similiarity
+            print(final_mask)
+            # changes calculation from here onwards
+
+            # Voting
+            self.election_commission(person_id, difference_feature2s, final_mask, 2, 5)
+            self.election_commission(person_id, difference_feature1s, final_mask, 1, 5)
+            self.election_commission(person_id, cosine_feature1s, final_mask, 100, 100)
+            self.election_commission(person_id, difference_positions, final_mask, 100, 100)
+            self.election_commission_zero_masker_similiarity(person_id, zero_maskers_similiarity, 0.7)
 #                 self.election_commission(person_id, difference_feature1s)
-                print(person_id)
-            else:
-                continue
+            print(person_id)
+
     
     def election_commission_zero_masker_similiarity(self, person_id, zero_maskers_similiarity, threshold):
         print('zero_masker_similiarity', zero_maskers_similiarity)
